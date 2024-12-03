@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Authentication</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <h1>Welcome to KAU live chat</h1>
+
+    <div>
+        <h2>Do you have an account?</h2>
+        <button id="yesButton">Yes, Log In</button>
+        <button id="noButton">No, Sign Up</button>
+    </div>
+
+    <div id="loginForm" style="display: none;">
+        <h2>Log In</h2>
+        <label for="loginName">Name:</label>
+        <input type="text" id="loginName" placeholder="Enter your name">
+        <br>
+        <label for="loginPassword">Password:</label>
+        <input type="password" id="loginPassword" placeholder="Enter your password">
+        <br>
+        <button id="loginButton">Log In</button>
+    </div>
+
+    <div id="signupForm" style="display: none;">
+        <h2>Sign Up</h2>
+        <label for="signupName">Name:</label>
+        <input type="text" id="signupName" placeholder="Enter your name">
+        <br>
+        <label for="signupPassword">Password:</label>
+        <input type="password" id="signupPassword" placeholder="Enter your password">
+        <br>
+        <button id="signupButton">Sign Up</button>
+    </div>
+
+    <div id="output">
+        <pre id="responseArea"></pre>
+    </div>
+
+    <script>
+        const yesButton = document.getElementById('yesButton');
+        const noButton = document.getElementById('noButton');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const loginButton = document.getElementById('loginButton');
+        const signupButton = document.getElementById('signupButton');
+        const responseArea = document.getElementById('responseArea');
+
+        // Show the correct form
+        yesButton.addEventListener('click', () => {
+            loginForm.style.display = 'block';
+            signupForm.style.display = 'none';
+        });
+
+        noButton.addEventListener('click', () => {
+            signupForm.style.display = 'block';
+            loginForm.style.display = 'none';
+        });
+
+        // Log in
+        loginButton.addEventListener('click', () => {
+            const name = document.getElementById('loginName').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (!name || !password) {
+                alert("Name and password are required for login!");
+                return;
+            }
+
+            // Send login request
+            fetch('http://localhost:8189/user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain',
+                    'Authorization': 'Bearer login-signup-temp'
+                },
+                body: `login\n${name}\n${password}`,
+            })
+                .then(response => response.text())
+                .then(data => {
+                    responseArea.textContent = data;
+                    if (data.includes("Login successful")) {
+                        const token = `${name}:${password}`; // Example token
+                        localStorage.setItem('authToken', token);
+                        window.location.href = 'index.html';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    responseArea.textContent = "Failed to connect to server.";
+                });
+        });
+
+        // Sign up
+        signupButton.addEventListener('click', () => {
+            const name = document.getElementById('signupName').value.trim();
+            const password = document.getElementById('signupPassword').value.trim();
+
+            if (!name || !password) {
+                alert("Name and password are required for sign-up!");
+                return;
+            }
+
+            // Send signup request
+            fetch('http://localhost:8189/user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain',
+                    'Authorization': 'Bearer login-signup-temp'
+                },
+                body: `signup\n${name}\n${password}`,
+            })
+                .then(response => response.text())
+                .then(data => {
+                    responseArea.textContent = "The User Already Exist!! ";
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    responseArea.textContent = "Failed to connect to server.";
+                });
+        });
+    </script>
+
+    
+
+    
+</body>
+
+</html>

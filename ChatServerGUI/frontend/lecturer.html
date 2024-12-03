@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecturer - Chat Room</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <button onclick="logout()">Log Out</button>
+    <button onclick="location.href='index.html';">Go Home</button>
+    <h1>Lecturer - Chat Room</h1>
+    <div class="container">
+
+        <label for="roomInput">Room Name</label>
+        <label for="roomSelect">Choose a Room:</label>
+
+        <select id="roomSelect">
+            <option value="Cpit305">Cpit305</option>
+            <option value="Cpit380">Cpit380</option>
+            <option value="Cpit470">Cpit470</option>
+        </select>
+        
+        <button id="joinRoomButton">Join Room</button>
+        <br>
+        <br>
+        <textarea id="messageInput" placeholder="Type your message here..."></textarea>
+        <br>
+        <button id="sendButton">Send!</button>
+        <div id="chatDisplay">
+            <h2>Chat Messages</h2>
+            <ul id="messageList"></ul>
+        </div>
+    </div>
+
+    <script>
+        //Join Room
+        document.getElementById("joinRoomButton").addEventListener("click", function () {
+            const selectedRoom = document.getElementById("roomSelect").value;
+            if (selectedRoom) {
+                alert("You have joined: " + selectedRoom);
+            } else {
+                alert("Please select a room.");
+            }
+        });
+        // Check if token exists
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            alert("You are not authenticated. Redirecting to login.");
+            window.location.href = 'auth.html';
+        }
+
+        
+        // Logout function
+        function logout() {
+            alert("Logged out.");
+            localStorage.removeItem('authToken'); // Clear authentication token
+            window.location.href = 'auth.html'; // Redirect to login page
+        }
+    </script>
+
+
+
+    <script>
+        const sendButton = document.getElementById("sendButton");
+        const messageInput = document.getElementById("messageInput");
+        const messageList = document.getElementById("messageList");
+    
+        sendButton.addEventListener("click", async () => {
+            const message = messageInput.value.trim(); // Get the user's message
+            if (message) {
+                try {
+                    // Send the message to the server
+                    const response = await fetch('http://localhost:8189/user', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'text/plain',
+                            'Authorization': 'Bearer valid-auth-token' // Replace with your token
+                        },
+                        body: `echo\n${message}` // Send the command and message
+                    });
+    
+                    if (response.ok) {
+                        // Wait for the server's response
+                        const responseData = await response.text();
+    
+                        if (responseData) {
+                            // Append the exact server response to the message list
+                            const listItem = document.createElement("li");
+                            listItem.textContent = responseData; // Show only the server response
+                            messageList.appendChild(listItem);
+    
+                            messageInput.value = "";
+                        } else {
+                            alert("Empty response from the server.");
+                        }
+                    } else {
+                        alert(`Error: ${response.status} - ${response.statusText}`);
+                    }
+                } catch (error) {
+                    alert("Failed to send message: " + error.message);
+                }
+            } else {
+                alert("Please enter a message.");
+            }
+        });
+    
+    </script>
+    
+    
+
+    <div>
+        <h2>Room Manager</h2>
+        <input type="text" id="roomInput" placeholder="Type Name to create" style="width: 30%;" />
+        <button id="createRoomButton">Create Room</button>
+    
+        <br><br>
+    
+        <select id="roomManagerSelect">
+            <option value="Cpit305">Cpit305</option>
+            <option value="Cpit380">Cpit380</option>
+            <option value="Cpit470">Cpit470</option>
+        </select>
+        
+        <button id="deleteRoomButton">Delete Room</button>
+    </div>
+    
+    
+    <script>
+        // Create Room
+        document.getElementById("createRoomButton").addEventListener("click", function () {
+        const roomName = document.getElementById("roomInput").value.trim();
+        const roomSelect = document.getElementById("roomSelect");  // First list
+        const roomSelectManager = document.getElementById("roomManagerSelect");  // Second list
+    
+        if (roomName) {
+            // Check if the room already exists in the first dropdown
+            const roomExists = Array.from(roomSelect.options).some(
+                (option) => option.value === roomName
+            );
+    
+            if (!roomExists) {
+                // Add the new room to both the first and second dropdowns
+                const newOption = document.createElement("option");
+                newOption.value = roomName;
+                newOption.textContent = roomName;
+                
+                // Append to the first dropdown
+                roomSelect.appendChild(newOption);
+                
+                // Append to the second dropdown
+                const newOptionManager = document.createElement("option");
+                newOptionManager.value = roomName;
+                newOptionManager.textContent = roomName;
+                roomSelectManager.appendChild(newOptionManager);
+    
+                alert(`Room "${roomName}" has been created in both lists.`);
+                document.getElementById("roomInput").value = ""; // Clear input field
+            } else {
+                alert("Room already exists in the first list!");
+            }
+        } else {
+            alert("Please enter a room name.");
+        }
+    });
+    
+        // Delete Room
+        document.getElementById("deleteRoomButton").addEventListener("click", function () {
+        const roomSelect = document.getElementById("roomSelect");  // First select
+        const roomSelectManager = document.getElementById("roomManagerSelect");  // Second select
+        
+        const selectedRoom = roomSelectManager.value;
+    
+        if (selectedRoom) {
+            // Find and remove the selected room from both the first and second dropdowns
+            const optionToDeleteManager = Array.from(roomSelectManager.options).find(
+                (option) => option.value === selectedRoom
+            );
+            const optionToDelete = Array.from(roomSelect.options).find(
+                (option) => option.value === selectedRoom
+            );
+
+            if (optionToDeleteManager && optionToDelete) {
+                roomSelect.removeChild(optionToDelete);
+                roomSelectManager.removeChild(optionToDeleteManager);
+                alert(`Room "${selectedRoom}" has been deleted from both lists.`);
+            }
+        } else {
+            alert("Please select a room to delete.");
+        }
+    });
+    </script>
+    
+    
+
+</body>
+
+</html>
