@@ -1,5 +1,5 @@
 # ChatServerGUI
-Simple Java-based chat server used via CLI, allowing users to join rooms and chat with each other, with a basic HTML/CSS frontend.
+Simple Java-based chat serverو allowing users to join rooms and chat with each other, with a basic HTML/CSS frontend.
 the function and logic of login/signup are correct, there a database and its work just fine, although the rest of functions its not working at least logicily !!.  this server is an Echo one so whatever the user send the server will send it back. the idea of this logic to create an interface of the chatServer one.
 
 Example:
